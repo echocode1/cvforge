@@ -1,3 +1,5 @@
+# Render Blueprint for the CVForge API (free plan).
+# Dashboard: New + > Blueprint > pick this repo. Secrets marked "sync: false" are asked for once.
 services:
   - type: web
     name: cvforge-api
@@ -8,17 +10,16 @@ services:
     buildCommand: >-
       corepack enable &&
       pnpm install --frozen-lockfile --prod=false &&
-      pnpm turbo run build --filter=@cvforge/api &&
-      pnpm --filter @cvforge/api run db:deploy
-    startCommand: pnpm --filter @cvforge/api run start
+      pnpm --filter @cvforge/api run build
+    startCommand: pnpm --filter @cvforge/api run start:prod
     envVars:
       - key: NODE_VERSION
         value: "22"
-      - key: DATABASE_URL
+      - key: DATABASE_URL # Neon POOLED connection string (host contains -pooler)
         sync: false
-      - key: DIRECT_URL
+      - key: DIRECT_URL # Neon DIRECT connection string (no -pooler); used for migrations
         sync: false
-      - key: CORS_ORIGIN
+      - key: CORS_ORIGIN # your website, e.g. https://cvforge-dev.vercel.app
         sync: false
       - key: JWT_SECRET
         generateValue: true
