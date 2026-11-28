@@ -19,9 +19,10 @@ export interface HttpOptions {
   baseURL?: string;
   /** Return the current access token (or null). Called before every request. */
   getToken?: () => string | null;
+  onUnauthorized?: () => void;
 }
 
-export function createHttp({ baseURL, getToken }: HttpOptions = {}): AxiosInstance {
+export function createHttp({ baseURL, getToken, onUnauthorized }: HttpOptions = {}): AxiosInstance {
   const http = axios.create({
     baseURL: baseURL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api',
     timeout: 15_000,
@@ -38,6 +39,7 @@ export function createHttp({ baseURL, getToken }: HttpOptions = {}): AxiosInstan
     (response) => response,
     (error: unknown) => {
       if (axios.isAxiosError<ApiError>(error)) {
+        if (error.response?.status === 401 && getToken?.()) onUnauthorized?.();
         throw new ApiRequestError(
           error.response?.data?.message ?? error.message,
           error.response?.status ?? 0,

@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cvforge-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    healthCheckPath: /api/health
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile --prod=false &&
+      pnpm turbo run build --filter=@cvforge/api &&
+      pnpm --filter @cvforge/api run db:deploy
+    startCommand: pnpm --filter @cvforge/api run start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d

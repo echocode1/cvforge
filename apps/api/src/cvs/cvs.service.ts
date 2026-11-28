@@ -1,55 +1,79 @@
-import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { emptyCvData, type CreateCvInput, type Cv, type UpdateCvInput } from '@cvforge/types';
+import type { Prisma } from '@prisma/client';
+import {
+  emptyCvData,
+  TEMPLATE_IDS,
+  type CreateCvInput,
+  type Cv,
+  type CvData,
+  type TemplateId,
+  type UpdateCvInput,
+} from '@cvforge/types';
+import { PrismaService } from '../prisma/prisma.service';
 
-/**
- * In-memory store for now: data resets when the API restarts.
- * Swap this Map for Prisma calls once the database is wired (same method signatures).
- */
+interface CvRow {
+  id: string;
+  title: string;
+  templateId: string;
+  data: Prisma.JsonValue;
+  createdAt: Date;
+  updatedAt: Date;
+}
+const toJson = (value: unknown): Prisma.InputJsonValue =>
+  JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+const toTemplateId = (value: string): TemplateId =>
+  (TEMPLATE_IDS as readonly string[]).includes(value) ? (value as TemplateId) : 'minimal';
+function toCv(row: CvRow): Cv {
+  return {
+    id: row.id,
+    title: row.title,
+    templateId: toTemplateId(row.templateId),
+    data: row.data as unknown as CvData,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
 @Injectable()
 export class CvsService {
-  private readonly store = new Map<string, Cv>();
-
-  list(): Cv[] {
-    return [...this.store.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  constructor(private readonly prisma: PrismaService) {}
+  async list(userId: string): Promise<Cv[]> {
+    return (
+      await this.prisma.cv.findMany({ where: { userId }, orderBy: { updatedAt: 'desc' } })
+    ).map(toCv);
   }
-
-  get(id: string): Cv {
-    const cv = this.store.get(id);
-    if (!cv) throw new NotFoundException(`CV ${id} not found`);
-    return cv;
+  async get(userId: string, id: string): Promise<Cv> {
+    const row = await this.prisma.cv.findFirst({ where: { id, userId } });
+    if (!row) throw new NotFoundException(`CV ${id} not found`);
+    return toCv(row);
   }
-
-  create(input: CreateCvInput): Cv {
-    const now = new Date().toISOString();
-    const cv: Cv = {
-      id: randomUUID(),
-      title: input.title,
-      templateId: input.templateId ?? 'minimal',
-      data: input.data ?? structuredClone(emptyCvData),
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.store.set(cv.id, cv);
-    return cv;
+  async create(userId: string, input: CreateCvInput): Promise<Cv> {
+    return toCv(
+      await this.prisma.cv.create({
+        data: {
+          userId,
+          title: input.title,
+          templateId: input.templateId ?? 'minimal',
+          data: toJson(input.data ?? emptyCvData),
+        },
+      }),
+    );
   }
-
-  update(id: string, input: UpdateCvInput): Cv {
-    const current = this.get(id);
-    const next: Cv = {
-      ...current,
-      title: input.title ?? current.title,
-      templateId: input.templateId ?? current.templateId,
-      data: input.data ?? current.data,
-      updatedAt: new Date().toISOString(),
-    };
-    this.store.set(id, next);
-    return next;
+  async update(userId: string, id: string, input: UpdateCvInput): Promise<Cv> {
+    await this.get(userId, id);
+    const row = await this.prisma.cv.update({
+      where: { id },
+      data: {
+        ...(input.title !== undefined && { title: input.title }),
+        ...(input.templateId !== undefined && { templateId: input.templateId }),
+        ...(input.data !== undefined && { data: toJson(input.data) }),
+      },
+    });
+    return toCv(row);
   }
-
-  remove(id: string): { id: string } {
-    this.get(id);
-    this.store.delete(id);
+  async remove(userId: string, id: string): Promise<{ id: string }> {
+    const result = await this.prisma.cv.deleteMany({ where: { id, userId } });
+    if (!result.count) throw new NotFoundException(`CV ${id} not found`);
     return { id };
   }
 }

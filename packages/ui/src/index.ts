@@ -17,3 +17,4 @@ export * from './landing/FaqList';
 export * from './shell/AppShell';
 export * from './dashboard/CvCard';
 export * from './dashboard/EmptyState';
+export * from './feedback/SlowServerHint';

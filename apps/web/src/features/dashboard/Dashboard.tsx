@@ -14,12 +14,23 @@ import Typography from '@mui/material/Typography';
 import { Copy, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useCreateCv, useCvs, useDeleteCv, useUpdateCvById } from '@cvforge/api-client';
 import { sampleCvData, type Cv } from '@cvforge/types';
-import { CvCard, EmptyState, RevealGroup, RevealItem, TEMPLATE_LABELS } from '@cvforge/ui';
+import {
+  CvCard,
+  EmptyState,
+  RevealGroup,
+  RevealItem,
+  SlowServerHint,
+  TEMPLATE_LABELS,
+} from '@cvforge/ui';
 import { timeAgo } from '@cvforge/utils';
 import { DeleteDialog } from './DeleteDialog';
 import { RenameDialog } from './RenameDialog';
 
-const GRID = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 2 } as const;
+const GRID = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+  gap: 2,
+} as const;
 
 export function Dashboard() {
   const router = useRouter();
@@ -52,13 +63,17 @@ export function Dashboard() {
 
   return (
     <Box sx={{ display: 'grid', gap: 2.5 }}>
-      {create.isError && <Alert severity="error">Could not create the CV. Check that the API is running.</Alert>}
+      {create.isError && (
+        <Alert severity="error">Could not create the CV. Check that the API is running.</Alert>
+      )}
       {error && (
         <Alert severity="error">
-          Could not reach the API. Start it with <code>pnpm dev</code> and check NEXT_PUBLIC_API_URL.
+          Could not reach the API. Start it with <code>pnpm dev</code> and check
+          NEXT_PUBLIC_API_URL.
         </Alert>
       )}
 
+      {isPending && !error && <SlowServerHint active={isPending && !error} />}
       {isPending && !error && (
         <Box sx={GRID} aria-busy="true" aria-label="Loading your CVs">
           {[0, 1, 2].map((i) => (
@@ -73,10 +88,19 @@ export function Dashboard() {
           text="Start from a blank page, or load a sample to see how the templates look. Everything you make shows up here."
           actions={
             <>
-              <Button variant="contained" startIcon={<Plus size={18} />} disabled={create.isPending} onClick={() => openNew('Untitled CV', false)}>
+              <Button
+                variant="contained"
+                startIcon={<Plus size={18} />}
+                disabled={create.isPending}
+                onClick={() => openNew('Untitled CV', false)}
+              >
                 Blank CV
               </Button>
-              <Button variant="outlined" disabled={create.isPending} onClick={() => openNew('Sample CV', true)}>
+              <Button
+                variant="outlined"
+                disabled={create.isPending}
+                onClick={() => openNew('Sample CV', true)}
+              >
                 Start from sample
               </Button>
             </>
@@ -104,9 +128,16 @@ export function Dashboard() {
               }}
             />
             <Typography variant="body2" color="text.secondary" sx={{ mr: 'auto' }}>
-              {filtered.length === cvs.length ? `${cvs.length} ${cvs.length === 1 ? 'CV' : 'CVs'}` : `${filtered.length} of ${cvs.length}`}
+              {filtered.length === cvs.length
+                ? `${cvs.length} ${cvs.length === 1 ? 'CV' : 'CVs'}`
+                : `${filtered.length} of ${cvs.length}`}
             </Typography>
-            <Button variant="outlined" size="small" disabled={create.isPending} onClick={() => openNew('Sample CV', true)}>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={create.isPending}
+              onClick={() => openNew('Sample CV', true)}
+            >
               New from sample
             </Button>
           </Box>
@@ -126,9 +157,22 @@ export function Dashboard() {
                     linkComponent={Link}
                     onDownload={() => router.push(`/cvs/${cv.id}?download=1`)}
                     menuActions={[
-                      { label: 'Rename', icon: <Pencil size={16} />, onClick: () => setRenaming(cv) },
-                      { label: 'Duplicate', icon: <Copy size={16} />, onClick: () => duplicate(cv) },
-                      { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => setDeleting(cv), danger: true },
+                      {
+                        label: 'Rename',
+                        icon: <Pencil size={16} />,
+                        onClick: () => setRenaming(cv),
+                      },
+                      {
+                        label: 'Duplicate',
+                        icon: <Copy size={16} />,
+                        onClick: () => duplicate(cv),
+                      },
+                      {
+                        label: 'Delete',
+                        icon: <Trash2 size={16} />,
+                        onClick: () => setDeleting(cv),
+                        danger: true,
+                      },
                     ]}
                   />
                 </RevealItem>
@@ -170,7 +214,12 @@ export function Dashboard() {
           });
         }}
       />
-      <Snackbar open={notice !== null} autoHideDuration={2800} onClose={() => setNotice(null)} message={notice} />
+      <Snackbar
+        open={notice !== null}
+        autoHideDuration={2800}
+        onClose={() => setNotice(null)}
+        message={notice}
+      />
     </Box>
   );
 }

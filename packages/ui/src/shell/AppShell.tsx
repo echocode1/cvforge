@@ -9,7 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Menu } from 'lucide-react';
+import { ArrowLeft, LogOut, Menu } from 'lucide-react';
 import { Logo } from '../brand/Logo';
 import { brand } from '../theme/theme';
 
@@ -31,6 +31,7 @@ export interface AppShellProps {
   headerActions?: ReactNode;
   userName?: string;
   userNote?: string;
+  onLogout?: () => void;
   backLink?: { label: string; href: string };
   /** Pass next/link for client-side navigation. */
   linkComponent?: ElementType;
@@ -48,16 +49,32 @@ function SidebarContent({
   pathname,
   userName,
   userNote,
+  onLogout,
   backLink,
   linkComponent,
   idPrefix,
   onNavigate,
-}: Omit<AppShellProps, 'title' | 'headerActions' | 'children'> & { idPrefix: string; onNavigate?: () => void }) {
+}: Omit<AppShellProps, 'title' | 'headerActions' | 'children'> & {
+  idPrefix: string;
+  onNavigate?: () => void;
+}) {
   const Link = linkComponent ?? 'a';
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', color: 'rgba(255,255,255,.82)', p: 1.5 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        color: 'rgba(255,255,255,.82)',
+        p: 1.5,
+      }}
+    >
       <Box sx={{ px: 1, py: 1.5 }}>
-        <Link href="/dashboard" aria-label="CVForge dashboard" style={{ display: 'inline-flex', textDecoration: 'none', color: 'inherit' }}>
+        <Link
+          href="/dashboard"
+          aria-label="CVForge dashboard"
+          style={{ display: 'inline-flex', textDecoration: 'none', color: 'inherit' }}
+        >
           <Logo tone="light" />
         </Link>
       </Box>
@@ -71,17 +88,40 @@ function SidebarContent({
                 <motion.span
                   layoutId={`${idPrefix}-active`}
                   transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-                  style={{ position: 'absolute', inset: 0, borderRadius: 10, background: 'rgba(255,255,255,.1)', boxShadow: `inset 3px 0 0 ${brand.marigold}` }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: 10,
+                    background: 'rgba(255,255,255,.1)',
+                    boxShadow: `inset 3px 0 0 ${brand.marigold}`,
+                  }}
                 />
               )}
-              <Box component="span" sx={{ position: 'relative', display: 'inline-flex', color: active ? brand.marigold : 'inherit' }}>
+              <Box
+                component="span"
+                sx={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  color: active ? brand.marigold : 'inherit',
+                }}
+              >
                 {item.icon}
               </Box>
               <Box component="span" sx={{ position: 'relative', flex: 1 }}>
                 {item.label}
               </Box>
               {item.badge && (
-                <Chip label={item.badge} size="small" sx={{ position: 'relative', height: 20, fontSize: 11, bgcolor: 'rgba(255,255,255,.12)', color: 'rgba(255,255,255,.8)' }} />
+                <Chip
+                  label={item.badge}
+                  size="small"
+                  sx={{
+                    position: 'relative',
+                    height: 20,
+                    fontSize: 11,
+                    bgcolor: 'rgba(255,255,255,.12)',
+                    color: 'rgba(255,255,255,.8)',
+                  }}
+                />
               )}
             </>
           );
@@ -100,7 +140,11 @@ function SidebarContent({
           } as const;
 
           return item.disabled ? (
-            <Box key={item.label} aria-disabled="true" sx={{ ...common, opacity: 0.5, cursor: 'not-allowed' }}>
+            <Box
+              key={item.label}
+              aria-disabled="true"
+              sx={{ ...common, opacity: 0.5, cursor: 'not-allowed' }}
+            >
               {content}
             </Box>
           ) : (
@@ -110,7 +154,11 @@ function SidebarContent({
               href={item.href}
               aria-current={active ? 'page' : undefined}
               onClick={onNavigate}
-              sx={{ ...common, transition: 'background-color .15s', '&:hover': { bgcolor: active ? undefined : 'rgba(255,255,255,.06)' } }}
+              sx={{
+                ...common,
+                transition: 'background-color .15s',
+                '&:hover': { bgcolor: active ? undefined : 'rgba(255,255,255,.06)' },
+              }}
             >
               {content}
             </Box>
@@ -123,13 +171,42 @@ function SidebarContent({
           <Box
             component={Link}
             href={backLink.href}
-            sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1, borderRadius: '10px', fontSize: '0.875rem', color: 'inherit', textDecoration: 'none', '&:hover': { bgcolor: 'rgba(255,255,255,.06)' } }}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 1.5,
+              py: 1,
+              borderRadius: '10px',
+              fontSize: '0.875rem',
+              color: 'inherit',
+              textDecoration: 'none',
+              '&:hover': { bgcolor: 'rgba(255,255,255,.06)' },
+            }}
           >
             <ArrowLeft size={16} /> {backLink.label}
           </Box>
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: '12px', bgcolor: 'rgba(255,255,255,.06)' }}>
-          <Avatar sx={{ width: 34, height: 34, bgcolor: brand.marigold, color: brand.ink, fontWeight: 700, fontSize: 15 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.25,
+            p: 1.25,
+            borderRadius: '12px',
+            bgcolor: 'rgba(255,255,255,.06)',
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 34,
+              height: 34,
+              bgcolor: brand.marigold,
+              color: brand.ink,
+              fontWeight: 700,
+              fontSize: 15,
+            }}
+          >
             {(userName ?? 'G').charAt(0).toUpperCase()}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
@@ -137,11 +214,24 @@ function SidebarContent({
               {userName ?? 'Guest'}
             </Typography>
             {userNote && (
-              <Typography variant="caption" noWrap sx={{ display: 'block', color: 'rgba(255,255,255,.6)' }}>
+              <Typography
+                variant="caption"
+                noWrap
+                sx={{ display: 'block', color: 'rgba(255,255,255,.6)' }}
+              >
                 {userNote}
               </Typography>
             )}
           </Box>
+          {onLogout && (
+            <IconButton
+              aria-label="Log out"
+              onClick={onLogout}
+              sx={{ color: 'rgba(255,255,255,.75)' }}
+            >
+              <LogOut size={18} />
+            </IconButton>
+          )}
         </Box>
       </Box>
     </Box>
@@ -149,13 +239,49 @@ function SidebarContent({
 }
 
 /** Signed-in layout: fixed sidebar on desktop, drawer on mobile, sticky header, animated page content. */
-export function AppShell({ navItems, pathname, title, headerActions, userName, userNote, backLink, linkComponent, children }: AppShellProps) {
+export function AppShell({
+  navItems,
+  pathname,
+  title,
+  headerActions,
+  userName,
+  userNote,
+  onLogout,
+  backLink,
+  linkComponent,
+  children,
+}: AppShellProps) {
   const [open, setOpen] = useState(false);
-  const sidebarProps = { navItems, pathname, userName, userNote, backLink, linkComponent };
+  const sidebarProps = {
+    navItems,
+    pathname,
+    userName,
+    userNote,
+    onLogout,
+    backLink,
+    linkComponent,
+  };
 
   return (
-    <Box className="app-shell-root" sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', md: `${SIDEBAR_W}px minmax(0,1fr)` }, minHeight: '100vh' }}>
-      <Box component="aside" className="no-print" sx={{ display: { xs: 'none', md: 'block' }, position: 'sticky', top: 0, height: '100vh', bgcolor: brand.ink }}>
+    <Box
+      className="app-shell-root"
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: 'minmax(0,1fr)', md: `${SIDEBAR_W}px minmax(0,1fr)` },
+        minHeight: '100vh',
+      }}
+    >
+      <Box
+        component="aside"
+        className="no-print"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          bgcolor: brand.ink,
+        }}
+      >
         <SidebarContent {...sidebarProps} idPrefix="desktop" />
       </Box>
 
@@ -187,17 +313,32 @@ export function AppShell({ navItems, pathname, title, headerActions, userName, u
             borderBottom: `1px solid ${brand.line}`,
           }}
         >
-          <IconButton sx={{ display: { md: 'none' } }} aria-label="Open menu" onClick={() => setOpen(true)}>
+          <IconButton
+            sx={{ display: { md: 'none' } }}
+            aria-label="Open menu"
+            onClick={() => setOpen(true)}
+          >
             <Menu size={22} />
           </IconButton>
           <Typography variant="h5" component="h1" noWrap>
             {title}
           </Typography>
-          <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1.5 }}>{headerActions}</Box>
+          <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {headerActions}
+          </Box>
         </Box>
 
-        <Box component="main" className="app-shell-main" sx={{ flex: 1, p: { xs: 2, md: 3 }, minWidth: 0 }}>
-          <motion.div key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+        <Box
+          component="main"
+          className="app-shell-main"
+          sx={{ flex: 1, p: { xs: 2, md: 3 }, minWidth: 0 }}
+        >
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
             {children}
           </motion.div>
         </Box>

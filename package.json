@@ -14,7 +14,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,yml}\"",
     "db:generate": "pnpm --filter @cvforge/api prisma generate",
     "db:migrate": "pnpm --filter @cvforge/api prisma migrate dev",
-    "db:studio": "pnpm --filter @cvforge/api prisma studio"
+    "db:studio": "pnpm --filter @cvforge/api prisma studio",
+    "db:deploy": "pnpm --filter @cvforge/api run db:deploy"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs}": [
