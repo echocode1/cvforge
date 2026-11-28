@@ -1,0 +1,22 @@
+echo "Pre-push checks (lockfile, TypeScript, build for the API and the website)..."
+
+pnpm install --frozen-lockfile --lockfile-only >/dev/null 2>&1 || {
+  echo ""
+  echo "PUSH BLOCKED: pnpm-lock.yaml is out of date with a package.json."
+  echo "Fix: run 'pnpm install', then commit pnpm-lock.yaml."
+  exit 1
+}
+
+pnpm typecheck || {
+  echo ""
+  echo "PUSH BLOCKED: TypeScript errors. Fix them (see above), commit, and push again."
+  exit 1
+}
+
+pnpm build || {
+  echo ""
+  echo "PUSH BLOCKED: the build failed. Fix it (see above), commit, and push again."
+  exit 1
+}
+
+echo "All checks passed. Pushing."
